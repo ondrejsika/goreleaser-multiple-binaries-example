@@ -1,0 +1,55 @@
+project_name: goreleaser-multiple-binaries-example
+
+before:
+  hooks:
+    - rm -rf ./dist
+    - go mod tidy
+
+builds:
+  - &build
+    id: hello
+    dir: ./bin/hello
+    binary: hello
+    env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - "386"
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: "386"
+      - goos: windows
+        goarch: "arm"
+      - goos: windows
+        goarch: "arm64"
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+  - <<: *build
+    id: ahoj
+    dir: ./bin/ahoj
+    binary: ahoj
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+release:
+  prerelease: auto
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  algorithm: sha256
