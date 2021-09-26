@@ -1,0 +1,1 @@
+# goreleaser-multiple-binaries-example
